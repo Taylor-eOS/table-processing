@@ -1,9 +1,9 @@
 import pandas as pd
 
-def filter_csv(input_file, output_file, column, value):
+def filter_csv(input_file, output_file, postnr_list):
     df = pd.read_csv(input_file, dtype=str)
-    filtered_df = df[df[column] == value]
-    filtered_df.to_csv(output_file, index=False)
+    df = df[df["Postnr."].isin(postnr_list)]
+    df.to_csv(output_file, index=False)
 
-filter_csv("cvr1.csv", "filtered.csv", "Hovedbranche", "433410 Maleraktiviteter")
+filter_csv("input.csv", "filtered.csv", ["1000"])
 
