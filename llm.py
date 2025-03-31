@@ -7,21 +7,38 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, torch_dtype=torch.bfloat16).to(device)
 
-def get_advice(text):
-    prompt = f"Determine if the industry `{text}` is relevant for someone with skills in the area programming. Answer only with `Yes` or `No`."
+def is_tech_or_chem_industry(text):
+    prompt = f"""Classify this job category for programming applicants:
+Category: {text}
+Relevant? (Yes/No):"""
+    
     inputs = tokenizer(prompt, return_tensors="pt").to(device)
     
     output = model.generate(
         inputs.input_ids,
-        max_new_tokens=4,
-        temperature=0.01,
+        max_new_tokens=2,
+        do_sample=False,
         pad_token_id=tokenizer.eos_token_id,
         eos_token_id=tokenizer.eos_token_id,
-        do_sample=False)
+        num_beams=2,
+        early_stopping=True
+    )
     
-    full_response = tokenizer.decode(output[0], skip_special_tokens=True)
-    return full_response.replace(prompt, "").strip().split('\n')[0].split('.')[0]
+    response = tokenizer.decode(output[0], skip_special_tokens=True)
+    return "Yes" if "Yes" in response.replace(prompt, "") else "No"
 
-if __name__ == "__main__":
-    print(get_advice("Health care"))
+# Verified test cases
+test_industries = [
+    ("Software engineering", "Yes"),
+    ("Daycare", "No"), 
+    ("Petroleum engineering", "Yes"),
+    ("Web development", "Yes"),
+    ("Preschool teaching", "No"),
+    ("Chemical plant operation", "Yes")
+]
+
+print("Industry: Prediction (Expected)")
+for industry, expected in test_industries:
+    prediction = is_tech_or_chem_industry(industry)
+    print(f"{industry}: {prediction} ({expected})")
 
