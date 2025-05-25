@@ -8,7 +8,7 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, torch_dtype=torch.bfloat16).to(device)
 
 def is_tech_industry(text):
-    prompt = f"""Classify this job category for programming/chemical engineering applicants:
+    prompt = f"""Rate this job category for relevancy to programming applicants:
 Category: {text}
 Relevant? (Yes/No):"""
     inputs = tokenizer(prompt, return_tensors="pt").to(device)
