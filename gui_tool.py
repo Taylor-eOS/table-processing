@@ -3,16 +3,19 @@ from tkinter import filedialog, messagebox
 import pandas as pd
 import openpyxl
 
+COL_1 = "Postnr."
+COL_2 = "Hovedbranche"
+
 def filter_csv(input_file, output_file, postnr_list, hovedbranche_list):
     if input_file.lower().endswith('.xlsx'):
         df = pd.read_excel(input_file, dtype=str)
     else:
         df = pd.read_csv(input_file, dtype=str)
     if postnr_list:
-        df = df[df["Postnr."].isin(postnr_list)]
+        df = df[df[COL_1].isin(postnr_list)]
     if hovedbranche_list:
         pattern = "|".join(hovedbranche_list)
-        df = df[df["Hovedbranche"].str.contains(pattern, na=False, case=False, regex=True)]
+        df = df[df[COL_2].str.contains(pattern, na=False, case=False, regex=True)]
     df.to_csv(output_file, index=False)
 
 class FilterGUI:
@@ -23,13 +26,13 @@ class FilterGUI:
         self.postnr_values = []
         self.hovedbranche_values = []
         tk.Label(root, text="").grid(row=0, column=0, padx=5, pady=5, columnspan=2)
-        tk.Label(root, text="Postnr.").grid(row=1, column=0, padx=5, pady=5)
-        tk.Label(root, text="Hovedbranche").grid(row=1, column=1, padx=5, pady=5)
+        tk.Label(root, text=COL_1).grid(row=1, column=0, padx=5, pady=5)
+        tk.Label(root, text=COL_2).grid(row=1, column=1, padx=5, pady=5)
         self.list_postnr = tk.Listbox(root, selectmode=tk.MULTIPLE, exportselection=False, width=30, height=10)
         self.list_postnr.grid(row=2, column=0, padx=5, pady=5)
         self.list_hovedbranche = tk.Listbox(root, selectmode=tk.MULTIPLE, exportselection=False, width=40, height=10)
         self.list_hovedbranche.grid(row=2, column=1, padx=5, pady=5)
-        self.btn_select_all_hovedbranche = tk.Button(root, text="Select All Hovedbranche", command=self.select_all_hovedbranche)
+        self.btn_select_all_hovedbranche = tk.Button(root, text=f"Select All {COL_2}", command=self.select_all_hovedbranche)
         self.btn_select_all_hovedbranche.grid(row=3, column=1, padx=5, pady=2, sticky="ew")
         self.btn_load = tk.Button(root, text="Open File", command=self.load_options)
         self.btn_load.grid(row=4, column=0, padx=5, pady=5, columnspan=2)
@@ -50,18 +53,18 @@ class FilterGUI:
                 df = pd.read_excel(self.input_file, dtype=str)
             else:
                 df = pd.read_csv(self.input_file, dtype=str)
-            if "Postnr." not in df.columns or "Hovedbranche" not in df.columns:
-                messagebox.showerror("Error", "Input file must contain 'Postnr.' and 'Hovedbranche' columns.")
+            if COL_1 not in df.columns or COL_2 not in df.columns:
+                messagebox.showerror("Error", f"Input file must contain '{COL_1}' and '{COL_2}' columns.")
                 return
-            self.postnr_values = sorted(df["Postnr."].dropna().unique().tolist())
-            self.hovedbranche_values = sorted(df["Hovedbranche"].dropna().unique().tolist())
+            self.postnr_values = sorted(df[COL_1].dropna().unique().tolist())
+            self.hovedbranche_values = sorted(df[COL_2].dropna().unique().tolist())
             self.list_postnr.delete(0, tk.END)
             for item in self.postnr_values:
                 self.list_postnr.insert(tk.END, item)
             self.list_hovedbranche.delete(0, tk.END)
             for item in self.hovedbranche_values:
                 self.list_hovedbranche.insert(tk.END, item)
-            messagebox.showinfo("Loaded", f"Loaded {len(self.postnr_values)} Postnr. and {len(self.hovedbranche_values)} Hovedbranche options.")
+            messagebox.showinfo("Loaded", f"Loaded {len(self.postnr_values)} {COL_1} and {len(self.hovedbranche_values)} {COL_2} options.")
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
