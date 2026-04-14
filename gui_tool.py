@@ -29,16 +29,19 @@ class FilterGUI:
         self.list_postnr.grid(row=2, column=0, padx=5, pady=5)
         self.list_hovedbranche = tk.Listbox(root, selectmode=tk.MULTIPLE, exportselection=False, width=40, height=10)
         self.list_hovedbranche.grid(row=2, column=1, padx=5, pady=5)
+        self.btn_select_all_hovedbranche = tk.Button(root, text="Select All Hovedbranche", command=self.select_all_hovedbranche)
+        self.btn_select_all_hovedbranche.grid(row=3, column=1, padx=5, pady=2, sticky="ew")
         self.btn_load = tk.Button(root, text="Open File", command=self.load_options)
-        self.btn_load.grid(row=3, column=0, padx=5, pady=5, columnspan=2)
+        self.btn_load.grid(row=4, column=0, padx=5, pady=5, columnspan=2)
         self.btn_filter_save = tk.Button(root, text="Save", command=self.filter_and_save)
-        self.btn_filter_save.grid(row=4, column=0, padx=5, pady=5, columnspan=2)
+        self.btn_filter_save.grid(row=5, column=0, padx=5, pady=5, columnspan=2)
+
+    def select_all_hovedbranche(self):
+        self.list_hovedbranche.select_set(0, tk.END)
 
     def load_options(self):
         if not self.input_file:
-            path = filedialog.askopenfilename(
-                filetypes=[("CSV or Excel files", "*.csv *.xlsx"), ("CSV Files", "*.csv"), ("Excel Files", "*.xlsx")]
-            )
+            path = filedialog.askopenfilename(filetypes=[("CSV or Excel files", "*.csv *.xlsx"), ("CSV Files", "*.csv"), ("Excel Files", "*.xlsx")])
             if not path:
                 return
             self.input_file = path
